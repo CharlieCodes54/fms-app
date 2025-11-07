@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FMS Assessment Tool</title>
+
+  <!-- Styles -->
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: #f5f5f7;
+      color: #111827;
+      padding: 24px;
+    }
+
+    .app-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 16px;
+    }
+
+    header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    .card {
+      background: #ffffff;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    label {
+      font-size: 12px;
+      display: block;
+      margin-bottom: 4px;
+      color: #4b5563;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      font-size: 13px;
+      margin-bottom: 8px;
+      background: #ffffff;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    .grid-2,
+    .grid-3,
+    .grid-4 {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    @media (max-width: 800px) {
+      .grid-2,
+      .grid-3,
+      .grid-4 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+
+    .checkbox-group span {
+      flex-basis: 100%;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 0;
+    }
+
+    .summary-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .summary-row div {
+      background: #f9fafb;
+      padding: 6px 8px;
+      border-radius: 6px;
+    }
+
+    .actions {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+    }
+
+    button {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: none;
+      font-size: 13px;
+      cursor: pointer;
+      background: #111827;
+      color: #ffffff;
+    }
+
+    button#generatePdfBtn {
+      background: #4b5563;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    .ai-summary {
+      margin-top: 8px;
+      padding: 8px;
+      background: #f9fafb;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .ai-summary pre {
+      font-size: 11px;
+      white-space: pre-wrap;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+
+  <!-- pdfmake (required for PDF export) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>Functional Movement Screen Assessment</h1>
+      <p class="subtitle">Structured capture • Automatic scoring • AI-assisted interpretation • PDF export</p>
+    </header>
+
+    <!-- Client Info -->
+    <section class="card">
+      <h2>Client Information</h2>
+      <div class="grid-2">
+        <div>
+          <label for="clientName">Client Name</label>
+          <input id="clientName" type="text">
+        </div>
+        <div>
+          <label for="assessmentDate">Assessment Date</label>
+          <input id="assessmentDate" type="date">
+        </div>
+        <div>
+          <label for="dob">Date of Birth</label>
+          <input id="dob" type="date">
+        </div>
+        <div>
+          <label for="sex">Sex</label>
+          <select id="sex">
+            <option value="">Select</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+            <option>Prefer not to say</option>
+          </select>
+        </div>
+        <div>
+          <label for="sport">Sport/Occupation</label>
+          <input id="sport" type="text">
+        </div>
+        <div>
+          <label for="assessor">Assessor</label>
+          <input id="assessor" type="text">
+        </div>
+      </div>
+      <label for="history">Relevant History / Precautions</label>
+      <textarea id="history" rows="2"></textarea>
+    </section>
+
+    <!-- FMS Form -->
+    <form id="fms-form">
+      <!-- 1. Deep Squat -->
+      <section class="card test-section" data-test="deepSquat">
+        <h2>1. Deep Squat</h2>
+        <div class="grid-2">
+          <div>
+            <label>Score (0–3)</label>
+            <select id="deepSquat_score">
+              <option value="">Select</option>
+              <option>3</option>
+              <option>2</option>
+              <option>1</option>
+              <option>0</option>
+            </select>
+          </div>
+        </div>
+        <div class="checkbox-group">
+          <span>Common Deviations:</span>
+          <label><input type="checkbox" name="deepSquat_dev" value="Heels lift">Heels lift</label>
+          <label><input type="checkbox" name="deepSquat_dev" value="Knees valgus">Knees valgus</label>
+          <label><input type="checkbox" name="deepSquat_dev" value="Knees varus">Knees varus</label>
+          <label><input type="checkbox" name="deepSquat_dev" value="Lumbar flexion">Lumbar flexion</label>
+          <label><input type="checkbox" name="deepSquat_dev" value="Lumbar hyperextension">Lumbar hyperextension</label>
+          <label><input type="checkbox" name="deepSquat_dev" value="Excess forward lean">Excess forward lean</label>
+          <label><input type="checkbox" name="deepSquat_dev" value="Bar not overhead / poor thoracic extension">Bar not overhead / poor thoracic extension</label>
+          <label><input type="checkbox" name="deepSquat_dev" value="Asymmetrical weight shift">Asymmetrical weight shift</label>
+        </div>
+        <label>Notes</label>
+        <textarea id="deepSquat_notes" rows="2"></textarea>
+      </section>
+
+      <!-- 2. Hurdle Step -->
+      <section class="card test-section" data-test="hurdleStep">
+        <h2>2. Hurdle Step</h2>
+        <div class="grid-3">
+          <div>
+            <label>Left Score (0–3)</label>
+            <select id="hurdle_left_score">
+              <option value="">Select</option>
+              <option>3</option><option>2</option><option>1</option><option>0</option>
+            </select>
+          </div>
+          <div>
+            <label>Right Score (0–3)</label>
+            <select id="hurdle_right_score">
+              <option value="">Select</option>
+              <option>3</option><option>2</option><option>1</option><option>0</option>
+            </select>
+          </div>
+          <div>
+            <label>Final (auto)</label>
+            <input id="hurdle_final" type="number" readonly>
+          </div>
+        </div>
+        <div class="checkbox-group">
+          <span>Common Deviations:</span>
+          <label><input type="checkbox" name="hurdle_dev" value="Loss of balance">Loss of balance</label>
+          <label><input type="checkbox" name="hurdle_dev" value="Pelvic drop or hike">Pelvic drop/hike</label>
+          <label><input type="checkbox" name="hurdle_dev" value="Hip external rotation / toe-out">Hip ER / toe-out</label>
+          <label><input type="checkbox" name="hurdle_dev" value="Knee valgus/varus">Knee valgus/varus</label>
+          <label><input type="checkbox" name="hurdle_dev" value="Trunk lateral flexion/rotation">Trunk deviation</label>
+          <label><input type="checkbox" name="hurdle_dev" value="Foot contacts hurdle / poor clearance">Poor clearance</label>
+        </div>
+        <label>Notes</label>
+        <textarea id="hurdle_notes" rows="2"></textarea>
+      </section>
+
+      <!-- 3. In-Line Lunge -->
+      <section class="card test-section" data-test="inlineLunge">
+        <h2>3. In-Line Lunge</h2>
+        <div class="grid-3">
+          <div>
+            <label>Left Score (0–3)</label>
+            <select id="lunge_left_score">
+              <option value="">Select</option>
+              <option>3</option><option>2</option><option>1</option><option>0</option>
+            </select>
+          </div>
+          <div>
+            <label>Right Score (0–3)</label>
+            <select id="lunge_right_score">
+              <option value="">Select</option>
+              <option>3</option><option>2</option><option>1</option><option>0</option>
+            </select>
+          </div>
+          <div>
+            <label>Final (auto)</label>
+            <input id="lunge_final" type="number" readonly>
+          </div>
+        </div>
+        <div class="checkbox-group">
+          <span>Common Deviations:</span>
+          <label><input type="checkbox" name="lunge_dev" value="Loss of balance">Loss of balance</label>
+          <label><input type="checkbox" name="lunge_dev" value="Trunk lean/rotation">Trunk lean/rotation</label>
+          <label><input type="checkbox" name="lunge_dev" value="Knee not tracking over foot">Knee tracking fault</label>
+          <label><input type="checkbox" name="lunge_dev" value="Rear heel lift">Rear heel lift</label>
+          <label><input type="checkbox" name="lunge_dev" value="Limited depth">Limited depth</label>
+        </div>
+        <label>Notes</label>
+        <textarea id="lunge_notes" rows="2"></textarea>
+      </section>
+
+      <!-- 4. Shoulder Mobility -->
+      <section class="card test-section" data-test="shoulderMobility">
+        <h2>4. Shoulder Mobility</h2>
+        <div class="grid-4">
+          <div>
+            <label>Left Score</label>
+            <select id="shoulder_left_score">
+              <option value="">Select</option>
+              <option>3</option><option>2</option><option>1</option><option>0</option>
+            </select>
+          </div>
+          <div>
+            <label>Right Score</label>
+            <select id="shoulder_right_score">
+              <option value="">Select</option>
+              <option>3</option><option>2</option><option>1</option><option>0</option>
+            </select>
+          </div>
+          <div>
+            <label>Clearing Pain?</label>
+            <select id="shoulder_clearing">
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div>
+            <label>Final (auto)</label>
+            <input id="shoulder_final" type="number" readonly>
+          </div>
+        </div>
+        <div class="checkbox-group">
+          <span>Common Deviations:</span>
+          <label><input type="checkbox" name="shoulder_dev" value="Excessive distance between fists">Excessive distance</label>
+          <label><input type="checkbox" name="shoulder_dev" value="Asymmetry left/right">Asymmetry</label>
+          <label><input type="checkbox" name="shoulder_dev" value="Scapular winging">Scapular winging</label>
+          <label><input type="checkbox" name="shoulder_dev" value="Thoracic flexion/extension fault">Thoracic fault</label>
+        </div>
+        <label>Notes</label>
+        <textarea id="shoulder_notes" rows="2"></textarea>
+      </section>
+
+      <!-- 5. Active Straight-Leg Raise -->
+      <section class="card test-section" data-test="activeSLR">
+        <h2>5. Active Straight-Leg Raise</h2>
+        <div class="grid-3">
+          <div>
+            <label>Left Score</label>
+            <select id="aslr_left_score">
+              <option value="">Select</option>
+              <option>3</option><option>2</option><option>1</option><option>0</option>
+            </select>
+          </div>
+          <div>
+            <label>Right Score</label>
+            <select id="aslr_right_score">
+              <option value="">Select</option>
+              <option>3</option><option>2</option><option>1</option><option>0</option>
+            </select>
+          </div>
+          <div>
+            <label>Final (auto)</label>
+            <input id="aslr_final" type="number" readonly>
+          </div>
+        </div>
+        <div class="checkbox-group">
+          <span>Common Deviations:</span>
+          <label><input type="checkbox" name="aslr_dev" value="Limited hamstring/hip flexion ROM">Limited ROM</label>
+          <label><input type="checkbox" name="aslr_dev" value="Contralateral leg lifts">Contralateral leg lifts</label>
+          <label><input type="checkbox" name="aslr_dev" value="Pelvic rotation / lumbar flexion">Pelvic/lumbar compensation</label>
+        </div>
+        <label>Notes</label>
+        <textarea id="aslr_notes" rows="2"></textarea>
+      </section>
+
+      <!-- 6. Trunk Stability Push-Up -->
+      <section class="card test-section" data-test="trunkStabilityPU">
+        <h2>6. Trunk Stability Push-Up</h2>
+        <div class="grid-3">
+          <div>
+            <label>Score</label>
+            <select id="tspu_score">
+              <option value="">Select</option>
+              <option>3</option><option>2</option><option>1</option><option>0</option>
+            </select>
+          </div>
+          <div>
+            <label>Clearing Pain?</label>
+            <select id="tspu_clearing">
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+        </div>
+        <div class="checkbox-group">
+          <span>Common Deviations:</span>
+          <label><input type="checkbox" name="tspu_dev" value="Loss of neutral spine">Loss of neutral spine</label>
+          <label><input type="checkbox" name="tspu_dev" value="Sagging hips">Sagging hips</label>
+          <label><input type="checkbox" name="tspu_dev" value="Piking hips">Piking hips</label>
+          <label><input type="checkbox" name="tspu_dev" value="Asymmetrical press">Asymmetrical press</label>
+        </div>
+        <label>Notes</label>
+        <textarea id="tspu_notes" rows="2"></textarea>
+      </section>
+
+      <!-- 7. Rotary Stability -->
+      <section class="card test-section" data-test="rotaryStability">
+        <h2>7. Rotary Stability</h2>
+        <div class="grid-4">
+          <div>
+            <label>Left Score</label>
+            <select id="rotary_left_score">
+              <option value="">Select</option>
+              <option>3</option><option>2</option><option>1</option><option>0</option>
+            </select>
+          </div>
+          <div>
+            <label>Right Score</label>
+            <select id="rotary_right_score">
+              <option value="">Select</option>
+              <option>3</option><option>2</option><option>1</option><option>0</option>
+            </select>
+          </div>
+          <div>
+            <label>Clearing Pain?</label>
+            <select id="rotary_clearing">
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div>
+            <label>Final (auto)</label>
+            <input id="rotary_final" type="number" readonly>
+          </div>
+        </div>
+        <div class="checkbox-group">
+          <span>Common Deviations:</span>
+          <label><input type="checkbox" name="rotary_dev" value="Loss of quadruped position">Loss of position</label>
+          <label><input type="checkbox" name="rotary_dev" value="Trunk rotation / lateral shift">Trunk rotation/shift</label>
+          <label><input type="checkbox" name="rotary_dev" value="Incomplete elbow-knee touch or extension">Incomplete pattern</label>
+        </div>
+        <label>Notes</label>
+        <textarea id="rotary_notes" rows="2"></textarea>
+      </section>
+    </form>
+
+    <!-- Summary and Actions -->
+    <section class="card">
+      <h2>Summary</h2>
+      <div class="summary-row">
+        <div>Total FMS Score: <span id="totalScore">-</span> / 21</div>
+        <div>Pain Present: <span id="painPresent">No</span></div>
+        <div>Asymmetries: <span id="asymmetries">None</span></div>
+        <div>Flags: <span id="flags">None</span></div>
+      </div>
+      <div id="aiSummaryContainer" class="ai-summary hidden">
+        <h3>AI Interpretation</h3>
+        <pre id="aiSummaryText"></pre>
+      </div>
+      <div class="actions">
+        <button id="generateAiBtn" type="button">Generate AI Summary</button>
+        <button id="generatePdfBtn" type="button">Generate PDF Report</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- App Script -->
+  <script>
+    // Requires a backend endpoint at POST /api/fms-interpretation
+    // that accepts the JSON payload and returns the structured AI summary.
+
+    let latestAiInterpretation = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      attachScoreListeners();
+      updateSummary();
+      document.getElementById('generateAiBtn').addEventListener('click', handleGenerateAi);
+      document.getElementById('generatePdfBtn').addEventListener('click', handleGeneratePdf);
+    });
+
+    function toInt(val) {
+      const n = parseInt(val, 10);
+      return isNaN(n) ? null : n;
+    }
+
+    function attachScoreListeners() {
+      const ids = [
+        'deepSquat_score',
+        'hurdle_left_score', 'hurdle_right_score',
+        'lunge_left_score', 'lunge_right_score',
+        'shoulder_left_score', 'shoulder_right_score',
+        'aslr_left_score', 'aslr_right_score',
+        'tspu_score',
+        'rotary_left_score', 'rotary_right_score'
+      ];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', updateSummary);
+      });
+
+      ['shoulder_clearing', 'tspu_clearing', 'rotary_clearing'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', updateSummary);
+      });
+
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', () => {});
+      });
+    }
+
+    function buildFmsReport() {
+      const client = {
+        name: document.getElementById('clientName').value.trim(),
+        dob: document.getElementById('dob').value,
+        sex: document.getElementById('sex').value,
+        sport: document.getElementById('sport').value.trim(),
+        assessmentDate: document.getElementById('assessmentDate').value,
+        assessor: document.getElementById('assessor').value.trim(),
+        history: document.getElementById('history').value.trim()
+      };
+
+      const getChecks = (name) =>
+        Array.from(document.querySelectorAll('input[name="' + name + '"]:checked'))
+          .map(cb => cb.value);
+
+      const deepSquatScore = toInt(document.getElementById('deepSquat_score').value);
+
+      const hurdleLeft = toInt(document.getElementById('hurdle_left_score').value);
+      const hurdleRight = toInt(document.getElementById('hurdle_right_score').value);
+      const hurdleFinal = minNonNull(hurdleLeft, hurdleRight);
+
+      const lungeLeft = toInt(document.getElementById('lunge_left_score').value);
+      const lungeRight = toInt(document.getElementById('lunge_right_score').value);
+      const lungeFinal = minNonNull(lungeLeft, lungeRight);
+
+      const shoulderLeft = toInt(document.getElementById('shoulder_left_score').value);
+      const shoulderRight = toInt(document.getElementById('shoulder_right_score').value);
+      const shoulderClearingPain = document.getElementById('shoulder_clearing').value === 'yes';
+      const shoulderBase = minNonNull(shoulderLeft, shoulderRight);
+      const shoulderFinal = shoulderClearingPain ? 0 : shoulderBase;
+
+      const aslrLeft = toInt(document.getElementById('aslr_left_score').value);
+      const aslrRight = toInt(document.getElementById('aslr_right_score').value);
+      const aslrFinal = minNonNull(aslrLeft, aslrRight);
+
+      const tspuScoreRaw = toInt(document.getElementById('tspu_score').value);
+      const tspuClearingPain = document.getElementById('tspu_clearing').value === 'yes';
+      const tspuScore = tspuClearingPain && tspuScoreRaw !== null ? 0 : tspuScoreRaw;
+
+      const rotaryLeft = toInt(document.getElementById('rotary_left_score').value);
+      const rotaryRight = toInt(document.getElementById('rotary_right_score').value);
+      const rotaryClearingPain = document.getElementById('rotary_clearing').value === 'yes';
+      const rotaryBase = minNonNull(rotaryLeft, rotaryRight);
+      const rotaryFinal = rotaryClearingPain ? 0 : rotaryBase;
+
+      const tests = {
+        deepSquat: {
+          score: deepSquatScore,
+          deviations: getChecks('deepSquat_dev'),
+          notes: document.getElementById('deepSquat_notes').value.trim()
+        },
+        hurdleStep: {
+          left: { score: hurdleLeft },
+          right: { score: hurdleRight },
+          deviations: getChecks('hurdle_dev'),
+          notes: document.getElementById('hurdle_notes').value.trim(),
+          finalScore: hurdleFinal
+        },
+        inlineLunge: {
+          left: { score: lungeLeft },
+          right: { score: lungeRight },
+          deviations: getChecks('lunge_dev'),
+          notes: document.getElementById('lunge_notes').value.trim(),
+          finalScore: lungeFinal
+        },
+        shoulderMobility: {
+          left: { score: shoulderLeft },
+          right: { score: shoulderRight },
+          deviations: getChecks('shoulder_dev'),
+          notes: document.getElementById('shoulder_notes').value.trim(),
+          clearingPain: shoulderClearingPain,
+          finalScore: shoulderFinal
+        },
+        activeSLR: {
+          left: { score: aslrLeft },
+          right: { score: aslrRight },
+          deviations: getChecks('aslr_dev'),
+          notes: document.getElementById('aslr_notes').value.trim(),
+          finalScore: aslrFinal
+        },
+        trunkStabilityPU: {
+          score: tspuScore,
+          deviations: getChecks('tspu_dev'),
+          notes: document.getElementById('tspu_notes').value.trim(),
+          clearingPain: tspuClearingPain
+        },
+        rotaryStability: {
+          left: { score: rotaryLeft },
+          right: { score: rotaryRight },
+          deviations: getChecks('rotary_dev'),
+          notes: document.getElementById('rotary_notes').value.trim(),
+          clearingPain: rotaryClearingPain,
+          finalScore: rotaryFinal
+        }
+      };
+
+      const finalScores = [
+        deepSquatScore,
+        hurdleFinal,
+        lungeFinal,
+        shoulderFinal,
+        aslrFinal,
+        tspuScore,
+        rotaryFinal
+      ];
+
+      const totalScore = finalScores.reduce((sum, v) => sum + (v ?? 0), 0);
+
+      const painPresent =
+        shoulderClearingPain ||
+        tspuClearingPain ||
+        rotaryClearingPain ||
+        hasZero(finalScores);
+
+      const asymmetries = {
+        hurdleStep: isAsym(hurdleLeft, hurdleRight),
+        inlineLunge: isAsym(lungeLeft, lungeRight),
+        shoulderMobility: isAsym(shoulderLeft, shoulderRight),
+        activeSLR: isAsym(aslrLeft, aslrRight),
+        rotaryStability: isAsym(rotaryLeft, rotaryRight)
+      };
+
+      const flags = [];
+      if (painPresent) flags.push('PainOrZeroScore');
+      if (totalScore && totalScore < 14) flags.push('LowTotalScore');
+      Object.entries(asymmetries).forEach(([k, v]) => {
+        if (v) flags.push('Asymmetry_' + k);
+      });
+
+      return {
+        client,
+        tests,
+        derived: {
+          totalScore,
+          painPresent,
+          asymmetries,
+          flags
+        }
+      };
+    }
+
+    function minNonNull(a, b) {
+      if (a == null && b == null) return null;
+      if (a == null) return b;
+      if (b == null) return a;
+      return Math.min(a, b);
+    }
+
+    function hasZero(arr) {
+      return arr.some(v => v === 0);
+    }
+
+    function isAsym(a, b) {
+      if (a == null || b == null) return false;
+      return a !== b;
+    }
+
+    function updateSummary() {
+      const report = buildFmsReport();
+      const derived = report.derived;
+
+      document.getElementById('hurdle_final').value =
+        report.tests.hurdleStep.finalScore ?? '';
+      document.getElementById('lunge_final').value =
+        report.tests.inlineLunge.finalScore ?? '';
+      document.getElementById('shoulder_final').value =
+        report.tests.shoulderMobility.finalScore ?? '';
+      document.getElementById('aslr_final').value =
+        report.tests.activeSLR.finalScore ?? '';
+      document.getElementById('rotary_final').value =
+        report.tests.rotaryStability.finalScore ?? '';
+
+      document.getElementById('totalScore').textContent =
+        derived.totalScore ? String(derived.totalScore) : '-';
+
+      document.getElementById('painPresent').textContent =
+        derived.painPresent ? 'Yes / Review' : 'No';
+
+      const asymList = Object.entries(derived.asymmetries)
+        .filter(([, v]) => v)
+        .map(([k]) => k)
+        .join(', ');
+      document.getElementById('asymmetries').textContent =
+        asymList || 'None';
+
+      document.getElementById('flags').textContent =
+        derived.flags && derived.flags.length
+          ? derived.flags.join(', ')
+          : 'None';
+    }
+
+    async function handleGenerateAi() {
+      const btn = document.getElementById('generateAiBtn');
+      btn.disabled = true;
+      const report = buildFmsReport();
+
+      try {
+        const res = await fetch('/api/fms-interpretation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(report)
+        });
+
+        if (!res.ok) throw new Error('API error');
+
+        const data = await res.json();
+        latestAiInterpretation = data;
+
+        const aiContainer = document.getElementById('aiSummaryContainer');
+        const aiText = document.getElementById('aiSummaryText');
+        aiContainer.classList.remove('hidden');
+        aiText.textContent = formatAiTextForDisplay(data);
+      } catch (err) {
+        alert('AI summary failed. Ensure /api/fms-interpretation is configured.');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function formatAiTextForDisplay(data) {
+      const lines = [];
+
+      if (data.summary) {
+        lines.push('Summary:');
+        lines.push(data.summary);
+        lines.push('');
+      }
+
+      if (Array.isArray(data.movement_dysfunctions) && data.movement_dysfunctions.length) {
+        lines.push('Movement Dysfunctions:');
+        data.movement_dysfunctions.forEach(md => {
+          lines.push('- ' + md.pattern + ':');
+          if (Array.isArray(md.findings)) {
+            md.findings.forEach(f => lines.push('  • ' + f));
+          }
+          if (Array.isArray(md.implications)) {
+            md.implications.forEach(i => lines.push('  - Implication: ' + i));
+          }
+        });
+        lines.push('');
+      }
+
+      if (Array.isArray(data.priority_issues) && data.priority_issues.length) {
+        lines.push('Priority Issues:');
+        data.priority_issues.forEach(p => lines.push('- ' + p));
+        lines.push('');
+      }
+
+      if (data.training_recommendations) {
+        const tr = data.training_recommendations;
+        if (Array.isArray(tr.phase_1_focus) && tr.phase_1_focus.length) {
+          lines.push('Phase 1 Focus:');
+          tr.phase_1_focus.forEach(x => lines.push('- ' + x));
+          lines.push('');
+        }
+        if (Array.isArray(tr.phase_2_focus) && tr.phase_2_focus.length) {
+          lines.push('Phase 2 Focus:');
+          tr.phase_2_focus.forEach(x => lines.push('- ' + x));
+          lines.push('');
+        }
+        if (Array.isArray(tr.specific_interventions)) {
+          lines.push('Specific Interventions:');
+          tr.specific_interventions.forEach(si => {
+            lines.push('Goal: ' + si.goal);
+            (si.strategies || []).forEach(s => lines.push('- ' + s));
+          });
+          lines.push('');
+        }
+        if (Array.isArray(tr.refer_out_flags) && tr.refer_out_flags.length) {
+          lines.push('Refer-Out Flags:');
+          tr.refer_out_flags.forEach(r => lines.push('- ' + r));
+          lines.push('');
+        }
+      }
+
+      return lines.join('\n');
+    }
+
+    function handleGeneratePdf() {
+      const report = buildFmsReport();
+      const docDefinition = buildPdfDefinition(report, latestAiInterpretation);
+      const filename = (report.client.name || 'client') + '_FMS_Report.pdf';
+      pdfMake.createPdf(docDefinition).download(filename);
+    }
+
+    function buildPdfDefinition(report, ai) {
+      const client = report.client;
+      const tests = report.tests;
+      const derived = report.derived;
+
+      const tableBody = [
+        [
+          { text: 'Test', bold: true },
+          { text: 'Left', bold: true },
+          { text: 'Right', bold: true },
+          { text: 'Final', bold: true },
+          { text: 'Notes / Deviations', bold: true }
+        ],
+        [
+          'Deep Squat',
+          '-',
+          '-',
+          tests.deepSquat.score ?? '',
+          (tests.deepSquat.deviations || []).join(', ')
+        ],
+        [
+          'Hurdle Step',
+          tests.hurdleStep.left.score ?? '',
+          tests.hurdleStep.right.score ?? '',
+          tests.hurdleStep.finalScore ?? '',
+          (tests.hurdleStep.deviations || []).join(', ')
+        ],
+        [
+          'In-Line Lunge',
+          tests.inlineLunge.left.score ?? '',
+          tests.inlineLunge.right.score ?? '',
+          tests.inlineLunge.finalScore ?? '',
+          (tests.inlineLunge.deviations || []).join(', ')
+        ],
+        [
+          'Shoulder Mobility',
+          tests.shoulderMobility.left.score ?? '',
+          tests.shoulderMobility.right.score ?? '',
+          tests.shoulderMobility.finalScore ?? '',
+          (tests.shoulderMobility.deviations || []).join(', ')
+        ],
+        [
+          'Active SLR',
+          tests.activeSLR.left.score ?? '',
+          tests.activeSLR.right.score ?? '',
+          tests.activeSLR.finalScore ?? '',
+          (tests.activeSLR.deviations || []).join(', ')
+        ],
+        [
+          'Trunk Stability PU',
+          '-',
+          '-',
+          tests.trunkStabilityPU.score ?? '',
+          (tests.trunkStabilityPU.deviations || []).join(', ')
+        ],
+        [
+          'Rotary Stability',
+          tests.rotaryStability.left.score ?? '',
+          tests.rotaryStability.right.score ?? '',
+          tests.rotaryStability.finalScore ?? '',
+          (tests.rotaryStability.deviations || []).join(', ')
+        ]
+      ];
+
+      const aiText = ai ? formatAiTextForDisplay(ai) : 'AI summary not generated.';
+
+      return {
+        content: [
+          {
+            text: 'Functional Movement Screen Report',
+            style: 'header'
+          },
+          {
+            text: 'Client: ' + (client.name || 'N/A') +
+                  ' | DOB: ' + (client.dob || 'N/A') +
+                  ' | Sex: ' + (client.sex || 'N/A'),
+            style: 'subheader'
+          },
+          {
+            text: 'Sport/Occupation: ' + (client.sport || 'N/A') +
+                  ' | Assessor: ' + (client.assessor || 'N/A') +
+                  ' | Date: ' + (client.assessmentDate || 'N/A'),
+            style: 'subheader'
+          },
+          {
+            text: client.history ? 'History/Precautions: ' + client.history : '',
+            margin: [0, 4, 0, 8],
+            fontSize: 9
+          },
+          {
+            table: {
+              headerRows: 1,
+              widths: ['*', 'auto', 'auto', 'auto', '*'],
+              body: tableBody
+            },
+            fontSize: 9,
+            margin: [0, 4, 0, 8]
+          },
+          {
+            text: 'Total FMS Score: ' + (derived.totalScore || 'N/A') + ' / 21',
+            fontSize: 10,
+            bold: true,
+            margin: [0, 2, 0, 0]
+          },
+          {
+            text: 'Pain Present: ' +
+                  (derived.painPresent
+                    ? 'Yes (review / refer as appropriate)'
+                    : 'No reported'),
+            fontSize: 9
+          },
+          {
+            text: 'Flags: ' +
+                  (derived.flags && derived.flags.length
+                    ? derived.flags.join(', ')
+                    : 'None'),
+            fontSize: 9,
+            margin: [0, 0, 0, 8]
+          },
+          {
+            text: 'AI-Assisted Interpretation (Non-Diagnostic)',
+            style: 'sectionHeader'
+          },
+          {
+            text: aiText,
+            fontSize: 8,
+            margin: [0, 2, 0, 8]
+          },
+          {
+            text: 'This report summarizes functional screening findings and training considerations only. It is not a medical diagnosis. Presence of pain or concerning findings warrants referral to an appropriate licensed provider.',
+            fontSize: 7,
+            color: '#6b7280'
+          }
+        ],
+        styles: {
+          header: {
+            fontSize: 16,
+            bold: true,
+            margin: [0, 0, 0, 4]
+          },
+          subheader: {
+            fontSize: 9,
+            margin: [0, 0, 0, 2]
+          },
+          sectionHeader: {
+            fontSize: 11,
+            bold: true,
+            margin: [0, 4, 0, 2]
+          }
+        },
+        defaultStyle: {
+          fontSize: 10
+        }
+      };
+    }
+  </script>
+</body>
+</html>
