@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>FMS Assessment Tool</title>
+  <title>FMS Assessment</title>
 
   <!-- Styles -->
   <style>
@@ -13,50 +13,79 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
+    :root {
+      --bg: #020817;
+      --bg-soft: #020817;
+      --card-bg: #020817;
+      --card-elevated: #020817;
+      --border-subtle: #111827;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.12);
+      --text-main: #e5e7eb;
+      --text-soft: #9ca3af;
+      --text-muted: #6b7280;
+      --danger: #f97316;
+      --radius: 12px;
+      --shadow-soft: 0 14px 45px rgba(15,23,42,0.45);
+      --input-bg: #020817;
+      --input-border: #111827;
+    }
+
     body {
-      background: #f5f5f7;
-      color: #111827;
+      background: radial-gradient(circle at top left, #111827 0, #020817 40%, #020817 100%);
+      color: var(--text-main);
       padding: 24px;
     }
 
     .app-container {
       max-width: 1200px;
-      margin: 0 auto;
+      margin: 0 auto 40px auto;
     }
 
     header {
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
 
     header h1 {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 600;
+      letter-spacing: 0.03em;
       margin-bottom: 4px;
+      color: #f9fafb;
     }
 
     .subtitle {
-      font-size: 13px;
-      color: #6b7280;
+      font-size: 12px;
+      color: var(--text-soft);
     }
 
     .card {
-      background: #ffffff;
-      padding: 16px 18px;
+      background: radial-gradient(circle at top left, rgba(56,189,248,0.06) 0, #020817 40%);
+      padding: 16px 18px 14px 18px;
       margin-bottom: 12px;
-      border-radius: 10px;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+      border-radius: var(--radius);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-soft);
     }
 
     .card h2 {
-      font-size: 18px;
+      font-size: 17px;
+      margin-bottom: 4px;
+      font-weight: 500;
+      color: #e5e7eb;
+    }
+
+    .movement-notes {
+      font-size: 11px;
+      color: var(--text-muted);
       margin-bottom: 8px;
     }
 
     label {
-      font-size: 12px;
+      font-size: 11px;
       display: block;
-      margin-bottom: 4px;
-      color: #4b5563;
+      margin-bottom: 3px;
+      color: var(--text-soft);
     }
 
     input[type="text"],
@@ -66,11 +95,26 @@
     textarea {
       width: 100%;
       padding: 6px 8px;
-      border-radius: 6px;
-      border: 1px solid #d1d5db;
-      font-size: 13px;
+      border-radius: 8px;
+      border: 1px solid var(--input-border);
+      font-size: 12px;
       margin-bottom: 8px;
-      background: #ffffff;
+      background: var(--input-bg);
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(56,189,248,0.25);
     }
 
     textarea {
@@ -82,7 +126,7 @@
     .grid-4 {
       display: grid;
       gap: 10px;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -100,15 +144,15 @@
     .checkbox-group {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px 16px;
-      margin-bottom: 8px;
-      font-size: 11px;
+      gap: 6px 16px;
+      margin-bottom: 6px;
+      font-size: 10px;
     }
 
     .checkbox-group span {
       flex-basis: 100%;
       font-weight: 500;
-      color: #374151;
+      color: var(--text-soft);
     }
 
     .checkbox-group label {
@@ -116,58 +160,123 @@
       align-items: center;
       gap: 4px;
       margin-bottom: 0;
+      color: var(--text-soft);
     }
 
     .summary-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
-      font-size: 13px;
-      margin-bottom: 8px;
+      gap: 8px;
+      font-size: 11px;
+      margin-bottom: 6px;
     }
 
     .summary-row div {
-      background: #f9fafb;
-      padding: 6px 8px;
-      border-radius: 6px;
+      background: rgba(15,23,42,0.95);
+      border-radius: 999px;
+      padding: 4px 10px;
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .summary-label {
+      color: var(--text-muted);
+    }
+
+    .summary-value {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .summary-pill-danger {
+      color: var(--danger);
+      font-weight: 600;
     }
 
     .actions {
-      margin-top: 8px;
+      margin-top: 6px;
       display: flex;
       gap: 8px;
     }
 
     button {
-      padding: 8px 14px;
-      border-radius: 8px;
+      padding: 7px 14px;
+      border-radius: 999px;
       border: none;
-      font-size: 13px;
+      font-size: 11px;
       cursor: pointer;
-      background: #111827;
-      color: #ffffff;
+      background: var(--accent);
+      color: #020817;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
     }
 
     button#generatePdfBtn {
-      background: #4b5563;
+      background: #111827;
+      color: var(--text-main);
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(15,23,42,0.5);
     }
 
     button:disabled {
-      opacity: 0.6;
+      opacity: 0.55;
       cursor: default;
+      box-shadow: none;
+      transform: none;
     }
 
     .ai-summary {
       margin-top: 8px;
       padding: 8px;
-      background: #f9fafb;
-      border-radius: 6px;
-      border: 1px solid #e5e7eb;
+      background: rgba(9,9,11,0.98);
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
     }
 
-    .ai-summary pre {
-      font-size: 11px;
-      white-space: pre-wrap;
+    .ai-summary h3 {
+      font-size: 12px;
+      margin-bottom: 4px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .ai-text {
+      font-size: 10px;
+      line-height: 1.5;
+      color: var(--text-soft);
+    }
+
+    .ai-text strong {
+      color: #e5e7eb;
+      font-weight: 600;
+    }
+
+    .ai-section-title {
+      display: block;
+      margin-top: 4px;
+      margin-bottom: 2px;
+      font-size: 10px;
+      color: var(--accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .ai-client-summary {
+      margin-top: 4px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: var(--accent-soft);
+      color: #bae6fd;
+      font-size: 10px;
     }
 
     .hidden {
@@ -175,15 +284,15 @@
     }
   </style>
 
-  <!-- pdfmake (required for PDF export) -->
+  <!-- pdfmake (for PDF export) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 </head>
 <body>
   <div class="app-container">
     <header>
-      <h1>Functional Movement Screen Assessment</h1>
-      <p class="subtitle">Structured capture • Automatic scoring • AI-assisted interpretation • PDF export</p>
+      <h1>FMS Assessment</h1>
+      <p class="subtitle">Standardized capture · Auto-scoring · AI-assisted, client-ready summary</p>
     </header>
 
     <!-- Client Info -->
@@ -192,15 +301,11 @@
       <div class="grid-2">
         <div>
           <label for="clientName">Client Name</label>
-          <input id="clientName" type="text">
+          <input id="clientName" type="text" placeholder="Full name">
         </div>
         <div>
           <label for="assessmentDate">Assessment Date</label>
           <input id="assessmentDate" type="date">
-        </div>
-        <div>
-          <label for="dob">Date of Birth</label>
-          <input id="dob" type="date">
         </div>
         <div>
           <label for="sex">Sex</label>
@@ -213,37 +318,37 @@
           </select>
         </div>
         <div>
-          <label for="sport">Sport/Occupation</label>
-          <input id="sport" type="text">
-        </div>
-        <div>
-          <label for="assessor">Assessor</label>
-          <input id="assessor" type="text">
+          <label for="sport">Sport / Occupation</label>
+          <input id="sport" type="text" placeholder="e.g., office worker, recreational runner">
         </div>
       </div>
       <label for="history">Relevant History / Precautions</label>
-      <textarea id="history" rows="2"></textarea>
+      <textarea id="history" rows="2" placeholder="Previous injuries, pain, medical clearance notes (no diagnoses)."></textarea>
     </section>
 
     <!-- FMS Form -->
     <form id="fms-form">
-      <!-- 1. Deep Squat -->
+      <!-- Deep Squat -->
       <section class="card test-section" data-test="deepSquat">
         <h2>1. Deep Squat</h2>
+        <div class="movement-notes">
+          Setup: Feet shoulder-width, dowel overhead, hands wider than shoulders.  
+          Execution: Full squat with heels down, knees tracking, dowel over feet, control through entire range.
+        </div>
         <div class="grid-2">
           <div>
-            <label>Score (0–3)</label>
+            <label>Score</label>
             <select id="deepSquat_score">
               <option value="">Select</option>
-              <option>3</option>
-              <option>2</option>
-              <option>1</option>
-              <option>0</option>
+              <option value="3">3 - Full pattern, no faults</option>
+              <option value="2">2 - Completes with minor compensation</option>
+              <option value="1">1 - Unable to complete pattern</option>
+              <option value="0">0 - Pain with movement</option>
             </select>
           </div>
         </div>
         <div class="checkbox-group">
-          <span>Common Deviations:</span>
+          <span>Common Deviations</span>
           <label><input type="checkbox" name="deepSquat_dev" value="Heels lift">Heels lift</label>
           <label><input type="checkbox" name="deepSquat_dev" value="Knees valgus">Knees valgus</label>
           <label><input type="checkbox" name="deepSquat_dev" value="Knees varus">Knees varus</label>
@@ -257,22 +362,32 @@
         <textarea id="deepSquat_notes" rows="2"></textarea>
       </section>
 
-      <!-- 2. Hurdle Step -->
+      <!-- Hurdle Step -->
       <section class="card test-section" data-test="hurdleStep">
         <h2>2. Hurdle Step</h2>
+        <div class="movement-notes">
+          Setup: Hurdle at tibial tuberosity height, dowel across shoulders or behind neck.  
+          Execution: Step over without touching string, pelvis level, trunk stable, stance foot stable.
+        </div>
         <div class="grid-3">
           <div>
-            <label>Left Score (0–3)</label>
+            <label>Left Score</label>
             <select id="hurdle_left_score">
               <option value="">Select</option>
-              <option>3</option><option>2</option><option>1</option><option>0</option>
+              <option value="3">3 - Clean pattern</option>
+              <option value="2">2 - Completes with compensation</option>
+              <option value="1">1 - Cannot clear without loss of form</option>
+              <option value="0">0 - Pain</option>
             </select>
           </div>
           <div>
-            <label>Right Score (0–3)</label>
+            <label>Right Score</label>
             <select id="hurdle_right_score">
               <option value="">Select</option>
-              <option>3</option><option>2</option><option>1</option><option>0</option>
+              <option value="3">3 - Clean pattern</option>
+              <option value="2">2 - Completes with compensation</option>
+              <option value="1">1 - Cannot clear without loss of form</option>
+              <option value="0">0 - Pain</option>
             </select>
           </div>
           <div>
@@ -281,7 +396,7 @@
           </div>
         </div>
         <div class="checkbox-group">
-          <span>Common Deviations:</span>
+          <span>Common Deviations</span>
           <label><input type="checkbox" name="hurdle_dev" value="Loss of balance">Loss of balance</label>
           <label><input type="checkbox" name="hurdle_dev" value="Pelvic drop or hike">Pelvic drop/hike</label>
           <label><input type="checkbox" name="hurdle_dev" value="Hip external rotation / toe-out">Hip ER / toe-out</label>
@@ -293,22 +408,32 @@
         <textarea id="hurdle_notes" rows="2"></textarea>
       </section>
 
-      <!-- 3. In-Line Lunge -->
+      <!-- In-Line Lunge -->
       <section class="card test-section" data-test="inlineLunge">
         <h2>3. In-Line Lunge</h2>
+        <div class="movement-notes">
+          Setup: Heel-to-toe stance on straight line, dowel along spine (head, T-spine, sacrum).  
+          Execution: Drop into lunge with control, trunk tall, front knee tracking over foot, dowel maintains contact.
+        </div>
         <div class="grid-3">
           <div>
-            <label>Left Score (0–3)</label>
+            <label>Left Score (left leg forward)</label>
             <select id="lunge_left_score">
               <option value="">Select</option>
-              <option>3</option><option>2</option><option>1</option><option>0</option>
+              <option value="3">3 - Clean pattern</option>
+              <option value="2">2 - Compensation present</option>
+              <option value="1">1 - Loss of balance / poor alignment</option>
+              <option value="0">0 - Pain</option>
             </select>
           </div>
           <div>
-            <label>Right Score (0–3)</label>
+            <label>Right Score (right leg forward)</label>
             <select id="lunge_right_score">
               <option value="">Select</option>
-              <option>3</option><option>2</option><option>1</option><option>0</option>
+              <option value="3">3 - Clean pattern</option>
+              <option value="2">2 - Compensation present</option>
+              <option value="1">1 - Loss of balance / poor alignment</option>
+              <option value="0">0 - Pain</option>
             </select>
           </div>
           <div>
@@ -317,7 +442,7 @@
           </div>
         </div>
         <div class="checkbox-group">
-          <span>Common Deviations:</span>
+          <span>Common Deviations</span>
           <label><input type="checkbox" name="lunge_dev" value="Loss of balance">Loss of balance</label>
           <label><input type="checkbox" name="lunge_dev" value="Trunk lean/rotation">Trunk lean/rotation</label>
           <label><input type="checkbox" name="lunge_dev" value="Knee not tracking over foot">Knee tracking fault</label>
@@ -328,22 +453,32 @@
         <textarea id="lunge_notes" rows="2"></textarea>
       </section>
 
-      <!-- 4. Shoulder Mobility -->
+      <!-- Shoulder Mobility -->
       <section class="card test-section" data-test="shoulderMobility">
         <h2>4. Shoulder Mobility</h2>
+        <div class="movement-notes">
+          Setup: Fists made, one hand overhead and one behind back.  
+          Execution: Reach toward each other without warm-up; measure distance; compare sides; add clearing test.
+        </div>
         <div class="grid-4">
           <div>
             <label>Left Score</label>
             <select id="shoulder_left_score">
               <option value="">Select</option>
-              <option>3</option><option>2</option><option>1</option><option>0</option>
+              <option value="3">3 - Fists within one hand length</option>
+              <option value="2">2 - Within 1.5 hand lengths</option>
+              <option value="1">1 - More than 1.5 hand lengths</option>
+              <option value="0">0 - Pain</option>
             </select>
           </div>
           <div>
             <label>Right Score</label>
             <select id="shoulder_right_score">
               <option value="">Select</option>
-              <option>3</option><option>2</option><option>1</option><option>0</option>
+              <option value="3">3 - Fists within one hand length</option>
+              <option value="2">2 - Within 1.5 hand lengths</option>
+              <option value="1">1 - More than 1.5 hand lengths</option>
+              <option value="0">0 - Pain</option>
             </select>
           </div>
           <div>
@@ -359,7 +494,7 @@
           </div>
         </div>
         <div class="checkbox-group">
-          <span>Common Deviations:</span>
+          <span>Common Deviations</span>
           <label><input type="checkbox" name="shoulder_dev" value="Excessive distance between fists">Excessive distance</label>
           <label><input type="checkbox" name="shoulder_dev" value="Asymmetry left/right">Asymmetry</label>
           <label><input type="checkbox" name="shoulder_dev" value="Scapular winging">Scapular winging</label>
@@ -369,22 +504,32 @@
         <textarea id="shoulder_notes" rows="2"></textarea>
       </section>
 
-      <!-- 5. Active Straight-Leg Raise -->
+      <!-- Active Straight-Leg Raise -->
       <section class="card test-section" data-test="activeSLR">
         <h2>5. Active Straight-Leg Raise</h2>
+        <div class="movement-notes">
+          Setup: Supine, arms at sides, ankles in neutral.  
+          Execution: Lift one leg with knee straight, opposite leg stays down; note where malleolus passes in relation to markers.
+        </div>
         <div class="grid-3">
           <div>
             <label>Left Score</label>
             <select id="aslr_left_score">
               <option value="">Select</option>
-              <option>3</option><option>2</option><option>1</option><option>0</option>
+              <option value="3">3 - Ankle above mid-thigh</option>
+              <option value="2">2 - Ankle between mid-thigh and knee</option>
+              <option value="1">1 - Ankle below knee line</option>
+              <option value="0">0 - Pain</option>
             </select>
           </div>
           <div>
             <label>Right Score</label>
             <select id="aslr_right_score">
               <option value="">Select</option>
-              <option>3</option><option>2</option><option>1</option><option>0</option>
+              <option value="3">3 - Ankle above mid-thigh</option>
+              <option value="2">2 - Ankle between mid-thigh and knee</option>
+              <option value="1">1 - Ankle below knee line</option>
+              <option value="0">0 - Pain</option>
             </select>
           </div>
           <div>
@@ -393,7 +538,7 @@
           </div>
         </div>
         <div class="checkbox-group">
-          <span>Common Deviations:</span>
+          <span>Common Deviations</span>
           <label><input type="checkbox" name="aslr_dev" value="Limited hamstring/hip flexion ROM">Limited ROM</label>
           <label><input type="checkbox" name="aslr_dev" value="Contralateral leg lifts">Contralateral leg lifts</label>
           <label><input type="checkbox" name="aslr_dev" value="Pelvic rotation / lumbar flexion">Pelvic/lumbar compensation</label>
@@ -402,15 +547,22 @@
         <textarea id="aslr_notes" rows="2"></textarea>
       </section>
 
-      <!-- 6. Trunk Stability Push-Up -->
+      <!-- Trunk Stability Push-Up -->
       <section class="card test-section" data-test="trunkStabilityPU">
         <h2>6. Trunk Stability Push-Up</h2>
+        <div class="movement-notes">
+          Setup: Prone, hands at standardized position based on sex, feet together.  
+          Execution: One rep push-up keeping body as a rigid plank, no sag or pike.
+        </div>
         <div class="grid-3">
           <div>
             <label>Score</label>
             <select id="tspu_score">
               <option value="">Select</option>
-              <option>3</option><option>2</option><option>1</option><option>0</option>
+              <option value="3">3 - Clean plank, no compensation</option>
+              <option value="2">2 - Performs with adjusted hand position</option>
+              <option value="1">1 - Unable to perform correctly</option>
+              <option value="0">0 - Pain</option>
             </select>
           </div>
           <div>
@@ -422,7 +574,7 @@
           </div>
         </div>
         <div class="checkbox-group">
-          <span>Common Deviations:</span>
+          <span>Common Deviations</span>
           <label><input type="checkbox" name="tspu_dev" value="Loss of neutral spine">Loss of neutral spine</label>
           <label><input type="checkbox" name="tspu_dev" value="Sagging hips">Sagging hips</label>
           <label><input type="checkbox" name="tspu_dev" value="Piking hips">Piking hips</label>
@@ -432,22 +584,32 @@
         <textarea id="tspu_notes" rows="2"></textarea>
       </section>
 
-      <!-- 7. Rotary Stability -->
+      <!-- Rotary Stability -->
       <section class="card test-section" data-test="rotaryStability">
         <h2>7. Rotary Stability</h2>
+        <div class="movement-notes">
+          Setup: Quadruped, hands under shoulders, knees under hips.  
+          Execution: Same-side arm and leg reach, then elbow-to-knee, then extend; repeat opposite; note stability and control.
+        </div>
         <div class="grid-4">
           <div>
             <label>Left Score</label>
             <select id="rotary_left_score">
               <option value="">Select</option>
-              <option>3</option><option>2</option><option>1</option><option>0</option>
+              <option value="3">3 - Clean same-side pattern</option>
+              <option value="2">2 - Clean opposite-side pattern</option>
+              <option value="1">1 - Unable without loss of control</option>
+              <option value="0">0 - Pain</option>
             </select>
           </div>
           <div>
             <label>Right Score</label>
             <select id="rotary_right_score">
               <option value="">Select</option>
-              <option>3</option><option>2</option><option>1</option><option>0</option>
+              <option value="3">3 - Clean same-side pattern</option>
+              <option value="2">2 - Clean opposite-side pattern</option>
+              <option value="1">1 - Unable without loss of control</option>
+              <option value="0">0 - Pain</option>
             </select>
           </div>
           <div>
@@ -463,7 +625,7 @@
           </div>
         </div>
         <div class="checkbox-group">
-          <span>Common Deviations:</span>
+          <span>Common Deviations</span>
           <label><input type="checkbox" name="rotary_dev" value="Loss of quadruped position">Loss of position</label>
           <label><input type="checkbox" name="rotary_dev" value="Trunk rotation / lateral shift">Trunk rotation/shift</label>
           <label><input type="checkbox" name="rotary_dev" value="Incomplete elbow-knee touch or extension">Incomplete pattern</label>
@@ -477,14 +639,26 @@
     <section class="card">
       <h2>Summary</h2>
       <div class="summary-row">
-        <div>Total FMS Score: <span id="totalScore">-</span> / 21</div>
-        <div>Pain Present: <span id="painPresent">No</span></div>
-        <div>Asymmetries: <span id="asymmetries">None</span></div>
-        <div>Flags: <span id="flags">None</span></div>
+        <div>
+          <span class="summary-label">Total FMS Score</span>
+          <span class="summary-value" id="totalScore">- / 21</span>
+        </div>
+        <div>
+          <span class="summary-label">Pain Present</span>
+          <span class="summary-value" id="painPresent">No</span>
+        </div>
+        <div>
+          <span class="summary-label">Asymmetries</span>
+          <span class="summary-value" id="asymmetries">None</span>
+        </div>
+        <div>
+          <span class="summary-label">Flags</span>
+          <span class="summary-value" id="flags">None</span>
+        </div>
       </div>
       <div id="aiSummaryContainer" class="ai-summary hidden">
         <h3>AI Interpretation</h3>
-        <pre id="aiSummaryText"></pre>
+        <div id="aiSummaryText" class="ai-text"></div>
       </div>
       <div class="actions">
         <button id="generateAiBtn" type="button">Generate AI Summary</button>
@@ -493,11 +667,8 @@
     </section>
   </div>
 
-  <!-- App Script -->
+  <!-- App Logic -->
   <script>
-    // Requires a backend endpoint at POST /api/fms-interpretation
-    // that accepts the JSON payload and returns the structured AI summary.
-
     let latestAiInterpretation = null;
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -540,11 +711,9 @@
     function buildFmsReport() {
       const client = {
         name: document.getElementById('clientName').value.trim(),
-        dob: document.getElementById('dob').value,
         sex: document.getElementById('sex').value,
         sport: document.getElementById('sport').value.trim(),
         assessmentDate: document.getElementById('assessmentDate').value,
-        assessor: document.getElementById('assessor').value.trim(),
         history: document.getElementById('history').value.trim()
       };
 
@@ -652,18 +821,18 @@
         hasZero(finalScores);
 
       const asymmetries = {
-        hurdleStep: isAsym(hurdleLeft, hurdleRight),
-        inlineLunge: isAsym(lungeLeft, lungeRight),
-        shoulderMobility: isAsym(shoulderLeft, shoulderRight),
-        activeSLR: isAsym(aslrLeft, aslrRight),
-        rotaryStability: isAsym(rotaryLeft, rotaryRight)
+        'Hurdle Step': isAsym(hurdleLeft, hurdleRight),
+        'In-Line Lunge': isAsym(lungeLeft, lungeRight),
+        'Shoulder Mobility': isAsym(shoulderLeft, shoulderRight),
+        'Active SLR': isAsym(aslrLeft, aslrRight),
+        'Rotary Stability': isAsym(rotaryLeft, rotaryRight)
       };
 
       const flags = [];
-      if (painPresent) flags.push('PainOrZeroScore');
-      if (totalScore && totalScore < 14) flags.push('LowTotalScore');
+      if (painPresent) flags.push('Pain or score of 0 present');
+      if (totalScore && totalScore < 14) flags.push('Total score < 14 (higher risk cluster)');
       Object.entries(asymmetries).forEach(([k, v]) => {
-        if (v) flags.push('Asymmetry_' + k);
+        if (v) flags.push('Asymmetry in ' + k);
       });
 
       return {
@@ -709,11 +878,13 @@
       document.getElementById('rotary_final').value =
         report.tests.rotaryStability.finalScore ?? '';
 
-      document.getElementById('totalScore').textContent =
-        derived.totalScore ? String(derived.totalScore) : '-';
+      const scoreText = derived.totalScore
+        ? derived.totalScore + ' / 21'
+        : '- / 21';
+      document.getElementById('totalScore').textContent = scoreText;
 
       document.getElementById('painPresent').textContent =
-        derived.painPresent ? 'Yes / Review' : 'No';
+        derived.painPresent ? 'Yes (review / consider referral)' : 'No';
 
       const asymList = Object.entries(derived.asymmetries)
         .filter(([, v]) => v)
@@ -724,7 +895,7 @@
 
       document.getElementById('flags').textContent =
         derived.flags && derived.flags.length
-          ? derived.flags.join(', ')
+          ? derived.flags.join(' | ')
           : 'None';
     }
 
@@ -748,7 +919,7 @@
         const aiContainer = document.getElementById('aiSummaryContainer');
         const aiText = document.getElementById('aiSummaryText');
         aiContainer.classList.remove('hidden');
-        aiText.textContent = formatAiTextForDisplay(data);
+        aiText.innerHTML = formatAiTextForDisplay(data);
       } catch (err) {
         alert('AI summary failed. Ensure /api/fms-interpretation is configured.');
       } finally {
@@ -756,63 +927,133 @@
       }
     }
 
+    // Trainer-optimized + client section formatting
     function formatAiTextForDisplay(data) {
+      const {
+        summary,
+        movement_dysfunctions,
+        priority_issues,
+        training_recommendations,
+        client_summary
+      } = data || {};
+
       const lines = [];
 
-      if (data.summary) {
-        lines.push('Summary:');
-        lines.push(data.summary);
-        lines.push('');
+      // Trainer overview
+      if (summary) {
+        lines.push('<span class="ai-section-title">Trainer Overview</span>');
+        lines.push('<div>' + escapeHtml(summary) + '</div>');
       }
 
-      if (Array.isArray(data.movement_dysfunctions) && data.movement_dysfunctions.length) {
-        lines.push('Movement Dysfunctions:');
-        data.movement_dysfunctions.forEach(md => {
-          lines.push('- ' + md.pattern + ':');
-          if (Array.isArray(md.findings)) {
-            md.findings.forEach(f => lines.push('  • ' + f));
+      // Key movement findings
+      if (Array.isArray(movement_dysfunctions) && movement_dysfunctions.length) {
+        lines.push('<span class="ai-section-title">Key Movement Findings</span>');
+        movement_dysfunctions.forEach(md => {
+          if (!md || !md.pattern) return;
+          lines.push('<div><strong>' + escapeHtml(md.pattern) + '</strong></div>');
+          if (Array.isArray(md.key_points)) {
+            md.key_points.forEach(p => {
+              lines.push('<div>- ' + escapeHtml(p) + '</div>');
+            });
+          } else if (Array.isArray(md.findings)) {
+            md.findings.forEach(p => {
+              lines.push('<div>- ' + escapeHtml(p) + '</div>');
+            });
           }
-          if (Array.isArray(md.implications)) {
-            md.implications.forEach(i => lines.push('  - Implication: ' + i));
+          if (Array.isArray(md.implications) && md.implications.length) {
+            lines.push('<div style="margin-left:8px; color:#9ca3af;">Implications:</div>');
+            md.implications.forEach(im => {
+              lines.push('<div style="margin-left:12px;">• ' + escapeHtml(im) + '</div>');
+            });
           }
         });
-        lines.push('');
       }
 
-      if (Array.isArray(data.priority_issues) && data.priority_issues.length) {
-        lines.push('Priority Issues:');
-        data.priority_issues.forEach(p => lines.push('- ' + p));
-        lines.push('');
+      // Priority issues
+      if (Array.isArray(priority_issues) && priority_issues.length) {
+        lines.push('<span class="ai-section-title">Priority Issues</span>');
+        priority_issues.forEach(p => {
+          lines.push('<div>- ' + escapeHtml(p) + '</div>');
+        });
       }
 
-      if (data.training_recommendations) {
-        const tr = data.training_recommendations;
-        if (Array.isArray(tr.phase_1_focus) && tr.phase_1_focus.length) {
-          lines.push('Phase 1 Focus:');
-          tr.phase_1_focus.forEach(x => lines.push('- ' + x));
-          lines.push('');
-        }
-        if (Array.isArray(tr.phase_2_focus) && tr.phase_2_focus.length) {
-          lines.push('Phase 2 Focus:');
-          tr.phase_2_focus.forEach(x => lines.push('- ' + x));
-          lines.push('');
-        }
-        if (Array.isArray(tr.specific_interventions)) {
-          lines.push('Specific Interventions:');
-          tr.specific_interventions.forEach(si => {
-            lines.push('Goal: ' + si.goal);
-            (si.strategies || []).forEach(s => lines.push('- ' + s));
+      const tr = training_recommendations || {};
+
+      // Contraindications
+      if (Array.isArray(tr.contraindications) && tr.contraindications.length) {
+        lines.push('<span class="ai-section-title">Programming Contraindications</span>');
+        tr.contraindications.forEach(c => {
+          lines.push('<div>- ' + escapeHtml(c) + '</div>');
+        });
+      }
+
+      // Goals
+      if (Array.isArray(tr.goals) && tr.goals.length) {
+        lines.push('<span class="ai-section-title">Primary Goals</span>');
+        tr.goals.forEach(g => {
+          lines.push('<div>- ' + escapeHtml(g) + '</div>');
+        });
+      }
+
+      // Implementation strategy
+      if (Array.isArray(tr.implementation_strategy) && tr.implementation_strategy.length) {
+        lines.push('<span class="ai-section-title">Implementation Strategy</span>');
+        tr.implementation_strategy.forEach(s => {
+          lines.push('<div>- ' + escapeHtml(s) + '</div>');
+        });
+      }
+
+      // Phase 1 / Phase 2 (kept concise)
+      if (Array.isArray(tr.phase_1_focus) && tr.phase_1_focus.length) {
+        lines.push('<span class="ai-section-title">Phase 1 Focus (Prep / Correctives)</span>');
+        tr.phase_1_focus.forEach(x => {
+          lines.push('<div>- ' + escapeHtml(x) + '</div>');
+        });
+      }
+
+      if (Array.isArray(tr.phase_2_focus) && tr.phase_2_focus.length) {
+        lines.push('<span class="ai-section-title">Phase 2 Focus (Integration)</span>');
+        tr.phase_2_focus.forEach(x => {
+          lines.push('<div>- ' + escapeHtml(x) + '</div>');
+        });
+      }
+
+      // Specific interventions (brief)
+      if (Array.isArray(tr.specific_interventions) && tr.specific_interventions.length) {
+        lines.push('<span class="ai-section-title">Key Intervention Themes</span>');
+        tr.specific_interventions.forEach(si => {
+          if (!si.goal) return;
+          lines.push('<div><strong>' + escapeHtml(si.goal) + '</strong></div>');
+          (si.strategies || []).slice(0, 3).forEach(s => {
+            lines.push('<div>- ' + escapeHtml(s) + '</div>');
           });
-          lines.push('');
-        }
-        if (Array.isArray(tr.refer_out_flags) && tr.refer_out_flags.length) {
-          lines.push('Refer-Out Flags:');
-          tr.refer_out_flags.forEach(r => lines.push('- ' + r));
-          lines.push('');
-        }
+        });
       }
 
-      return lines.join('\n');
+      // Refer-out flags
+      if (Array.isArray(tr.refer_out_flags) && tr.refer_out_flags.length) {
+        lines.push('<span class="ai-section-title">Refer-Out Flags</span>');
+        tr.refer_out_flags.forEach(r => {
+          lines.push('<div class="summary-pill-danger">- ' + escapeHtml(r) + '</div>');
+        });
+      }
+
+      // Client-facing summary block
+      if (client_summary) {
+        lines.push('<div class="ai-client-summary"><strong>Client Summary:</strong> ' +
+          escapeHtml(client_summary) + '</div>');
+      }
+
+      return lines.join('');
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
 
     function handleGeneratePdf() {
@@ -823,10 +1064,7 @@
     }
 
     function buildPdfDefinition(report, ai) {
-      const client = report.client;
-      const tests = report.tests;
-      const derived = report.derived;
-
+      const { client, tests, derived } = report;
       const tableBody = [
         [
           { text: 'Test', bold: true },
@@ -886,7 +1124,8 @@
         ]
       ];
 
-      const aiText = ai ? formatAiTextForDisplay(ai) : 'AI summary not generated.';
+      const aiHtml = ai ? formatAiTextForDisplay(ai) : 'AI summary not generated.';
+      const aiTextPlain = aiHtml.replace(/<[^>]+>/g, '');
 
       return {
         content: [
@@ -895,21 +1134,13 @@
             style: 'header'
           },
           {
-            text: 'Client: ' + (client.name || 'N/A') +
-                  ' | DOB: ' + (client.dob || 'N/A') +
-                  ' | Sex: ' + (client.sex || 'N/A'),
+            text: `Client: ${client.name || 'N/A'} | Sex: ${client.sex || 'N/A'} | Sport/Occupation: ${client.sport || 'N/A'} | Date: ${client.assessmentDate || 'N/A'}`,
             style: 'subheader'
           },
           {
-            text: 'Sport/Occupation: ' + (client.sport || 'N/A') +
-                  ' | Assessor: ' + (client.assessor || 'N/A') +
-                  ' | Date: ' + (client.assessmentDate || 'N/A'),
-            style: 'subheader'
-          },
-          {
-            text: client.history ? 'History/Precautions: ' + client.history : '',
+            text: client.history ? `History/Precautions: ${client.history}` : '',
             margin: [0, 4, 0, 8],
-            fontSize: 9
+            fontSize: 8
           },
           {
             table: {
@@ -917,63 +1148,57 @@
               widths: ['*', 'auto', 'auto', 'auto', '*'],
               body: tableBody
             },
-            fontSize: 9,
+            fontSize: 8,
             margin: [0, 4, 0, 8]
           },
           {
-            text: 'Total FMS Score: ' + (derived.totalScore || 'N/A') + ' / 21',
-            fontSize: 10,
+            text: `Total FMS Score: ${derived.totalScore || 'N/A'} / 21`,
+            fontSize: 9,
             bold: true,
             margin: [0, 2, 0, 0]
           },
           {
-            text: 'Pain Present: ' +
-                  (derived.painPresent
-                    ? 'Yes (review / refer as appropriate)'
-                    : 'No reported'),
-            fontSize: 9
+            text: `Pain Present: ${derived.painPresent ? 'Yes (review / consider referral)' : 'No reported'}`,
+            fontSize: 8
           },
           {
-            text: 'Flags: ' +
-                  (derived.flags && derived.flags.length
-                    ? derived.flags.join(', ')
-                    : 'None'),
-            fontSize: 9,
-            margin: [0, 0, 0, 8]
+            text: `Flags: ${derived.flags && derived.flags.length ? derived.flags.join(' | ') : 'None'}`,
+            fontSize: 8,
+            margin: [0, 0, 0, 6]
           },
           {
-            text: 'AI-Assisted Interpretation (Non-Diagnostic)',
+            text: 'AI-Assisted Summary (Trainer-Facing)',
             style: 'sectionHeader'
           },
           {
-            text: aiText,
-            fontSize: 8,
-            margin: [0, 2, 0, 8]
+            text: aiTextPlain,
+            fontSize: 7,
+            margin: [0, 2, 0, 6]
           },
           {
             text: 'This report summarizes functional screening findings and training considerations only. It is not a medical diagnosis. Presence of pain or concerning findings warrants referral to an appropriate licensed provider.',
-            fontSize: 7,
+            fontSize: 6,
             color: '#6b7280'
           }
         ],
         styles: {
           header: {
-            fontSize: 16,
+            fontSize: 13,
             bold: true,
-            margin: [0, 0, 0, 4]
+            margin: [0, 0, 0, 3]
           },
           subheader: {
-            fontSize: 9,
+            fontSize: 8,
             margin: [0, 0, 0, 2]
           },
           sectionHeader: {
-            fontSize: 11,
+            fontSize: 8,
             bold: true,
             margin: [0, 4, 0, 2]
           }
         },
         defaultStyle: {
-          fontSize: 10
+          fontSize: 8
         }
       };
     }
