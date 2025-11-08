@@ -1,5 +1,5 @@
 // api/fms-interpretation.js
-// Vercel Node.js Serverless Function (CommonJS), manual JSON body parsing.
+// Vercel Node.js Serverless Function for FMS AI summary
 
 const OpenAI = require("openai");
 
@@ -7,16 +7,15 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Helper: read raw body from Vercel serverless request
+// Read JSON body (Vercel Node serverless: no built-in body parser)
 async function readJsonBody(req, res) {
   try {
     const chunks = [];
-    for await (const chunk of req) {
-      chunks.push(chunk);
-    }
+    for await (const chunk of req) chunks.push(chunk);
     const raw = Buffer.concat(chunks).toString("utf8") || "{}";
     return JSON.parse(raw);
   } catch (err) {
+    console.error("Body parse error:", err);
     res.status(400).json({ error: "Invalid JSON body" });
     return null;
   }
@@ -28,7 +27,6 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // Parse body manually
   const fmsReport = await readJsonBody(req, res);
   if (!fmsReport) return;
 
@@ -43,7 +41,6 @@ module.exports = async (req, res) => {
     }
 
     const systemPrompt = `
-const systemPrompt = `
 You are an expert strength & conditioning coach.
 Interpret Functional Movement Screen (FMS) data for a personal trainer.
 
@@ -154,7 +151,6 @@ Global constraints:
 - Do NOT add fields, headings, markdown, or commentary outside the specified JSON.
 `;
 
-
     const userPrompt = `FMS report JSON:\n${JSON.stringify(
       fmsReport,
       null,
@@ -162,7 +158,7 @@ Global constraints:
     )}`;
 
     const completion = await client.chat.completions.create({
-      model: "gpt-4.1-mini",
+      model: "gpt-4.1-mini", // adjust if your account uses a different current model
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: systemPrompt },
@@ -175,21 +171,31 @@ Global constraints:
     let parsed;
     try {
       parsed = JSON.parse(raw);
-    } catch {
+    } catch (e) {
+      console.error("Parse error:", e, "raw:", raw);
+      parsed = null;
+    }
+
+    // Fallback if model returns bad JSON
+    if (!parsed || typeof parsed !== "object") {
       parsed = {
-        summary: "Unable to parse structured AI output.",
+        summary: "Unable to parse AI output.",
         movement_dysfunctions: [],
         priority_issues: [],
         training_recommendations: {
+          contraindications: [],
+          goals: [],
+          implementation_strategy: [],
           phase_1_focus: [],
           phase_2_focus: [],
           specific_interventions: [],
-          refer_out_flags: [],
+          refer_out_flags: []
         },
+        client_summary: ""
       };
     }
 
-    // Enforce schema
+    // Defensive normalization
     if (typeof parsed.summary !== "string") parsed.summary = "";
     if (!Array.isArray(parsed.movement_dysfunctions))
       parsed.movement_dysfunctions = [];
@@ -198,20 +204,27 @@ Global constraints:
 
     if (typeof parsed.training_recommendations !== "object") {
       parsed.training_recommendations = {
+        contraindications: [],
+        goals: [],
+        implementation_strategy: [],
         phase_1_focus: [],
         phase_2_focus: [],
         specific_interventions: [],
-        refer_out_flags: [],
+        refer_out_flags: []
       };
     } else {
       const tr = parsed.training_recommendations;
+      if (!Array.isArray(tr.contraindications)) tr.contraindications = [];
+      if (!Array.isArray(tr.goals)) tr.goals = [];
+      if (!Array.isArray(tr.implementation_strategy)) tr.implementation_strategy = [];
       if (!Array.isArray(tr.phase_1_focus)) tr.phase_1_focus = [];
       if (!Array.isArray(tr.phase_2_focus)) tr.phase_2_focus = [];
-      if (!Array.isArray(tr.specific_interventions))
-        tr.specific_interventions = [];
-      if (!Array.isArray(tr.refer_out_flags))
-        tr.refer_out_flags = [];
+      if (!Array.isArray(tr.specific_interventions)) tr.specific_interventions = [];
+      if (!Array.isArray(tr.refer_out_flags)) tr.refer_out_flags = [];
     }
+
+    if (typeof parsed.client_summary !== "string")
+      parsed.client_summary = "";
 
     res.status(200).json(parsed);
   } catch (error) {
